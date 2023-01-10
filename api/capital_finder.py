@@ -9,18 +9,22 @@ class handler(BaseHTTPRequestHandler):
         query_string_list = parse.parse_qsl(url_components.query)
         dic = dict(query_string_list)
 
-        if "word" in dic:
-            url = "https://api.dictionaryapi.dev/api/v2/entries/en/"
-            r = requests.get(url + dic["word"])
+        if "country" in dic:
+            url = "https://restcountries.com/v3.1/name/"
+            r = requests.get(url + dic["country"])
             data = r.json()
-            definitions = []
-            for word_data in data:
-                definition = word_data["meanings"][0]["definitions"][0]["definition"]
-                definitions.append(definition)
-            message = str(definitions)
+            capital = data[0]["capital"]
+            message = f"The capital of {dic['country']} is {capital}"
+
+        elif "capital" in dic:
+            url = "https://restcountries.com/v3.1/capital/"
+            r = requests.get(url + dic["capital"])
+            data = r.json()
+            country = data[0]["name"]["common"]
+            message = f"{dic['capital']} is the capital of {country}."
 
         else:
-            message = "Give me a word to define please"
+            message = "For what country do you want to know the capital"
 
         self.send_response(200)
         self.send_header('Content-type','text/plain')
@@ -28,4 +32,4 @@ class handler(BaseHTTPRequestHandler):
 
         self.wfile.write(message.encode())
 
-        return
+        return 
